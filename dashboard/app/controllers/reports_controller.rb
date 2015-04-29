@@ -235,6 +235,13 @@ SQL
     @data_array = @data_array.select{|x| x['TotalAttempt'].to_i > 10}.sort_by{|i| Naturally.normalize(i.send(:fetch, 'Puzzle'))}
   end
 
+  def pd_progress
+    authorize! :read, :reports
+    @script = Script.find_by(name: 'K5PD')
+    # Get all users with any activity in the script
+    @users = Activity.where(level_id: @script.levels.map(&:id)).map(&:user_id).uniq.map{|id|User.find(id)}
+  end
+
   private
   def get_base_usage_activity
     Activity.all.order('id desc').includes([:user, :level_source, {level: :game}]).limit(50)
